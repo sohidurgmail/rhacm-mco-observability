@@ -3,17 +3,22 @@ kind: MultiClusterObservability
 metadata:
   name: observability
 spec:
-  # Optional, keep if you already standardize on it:
   imagePullPolicy: IfNotPresent
 
-  # If you use sizing in your environment, keep your existing variable:
-  instanceSize: 4xlarge
+  # Keep this conservative for portability across hubs.
+  # Increase per hub capacity only after validating PVC binding + CPU headroom.
+  instanceSize: large
 
   advanced:
     retentionConfig:
       retentionResolution1h: 30d
       retentionResolution5m: 14d
       retentionResolutionRaw: 5d
+
+    # Short-term stability / capacity-safe default:
+    # Prevents "one receive pod Pending" -> "ForwardFailed" scenarios on smaller hubs.
+    receive:
+      replicas: 5
 
   observabilityAddonSpec:
     enableMetrics: true
@@ -24,6 +29,7 @@ spec:
       name: thanos-object-storage
       key: thanos.yaml
 
-      # Mount your S3 CA cert secret into the observability components:
+      # S3/TLS (CA bundle) secret for the object storage endpoint
       tlsSecretName: s3-ca-cert
       tlsSecretMountPath: /etc/s3/certs
+
