@@ -1,5 +1,6 @@
-DOCKER_CONFIG_JSON=$(oc extract secret/pull-secret -n openshift-config --to=-)
+#!/usr/bin/env bash
 
+DOCKER_CONFIG_JSON=$(oc extract secret/pull-secret -n openshift-config --to=-)
 oc -n open-cluster-management-observability create secret generic multiclusterhub-operator-pull-secret \
   --from-literal=.dockerconfigjson="$DOCKER_CONFIG_JSON" \
   --type=kubernetes.io/dockerconfigjson
